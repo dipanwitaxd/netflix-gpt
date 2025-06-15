@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Image from "next/image";
 import {
   Button,
@@ -13,15 +13,28 @@ import {
   TextField,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import Link from "next/link";
+import { checkValidData } from "@/utils/validation";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [learnMore, setLearnMore] = useState(false);
   const [toggleSignUp, setToggleSignUp] = useState(false);
+  const [formError, setFormError] = useState(null);
+  const nameRef = useRef(null);
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleToggleSignUp = () => setToggleSignUp((prev) => !prev);
+  const handleSignIn = () => {
+    // Validate form Data
+    const error = checkValidData(
+      emailRef.current.value,
+      passwordRef.current.value
+    );
+    setFormError(error);
+    console.log(error);
+  };
 
   return (
     <div className="p-8 z-10">
@@ -36,10 +49,14 @@ const Login = () => {
             width: "450px",
           }}
           className="flex flex-col justify-center items-center gap-4 py-8 px-16"
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
         >
           <div className="text-2xl font-bold" style={{ color: "white" }}>
             {toggleSignUp ? "Sign Up" : "Sign In"}
           </div>
+          <p className="text-red-600">{formError}</p>
           {toggleSignUp && (
             <TextField
               id="outlined-basic"
@@ -64,6 +81,7 @@ const Login = () => {
           <TextField
             id="outlined-basic"
             label="Email or mobile number "
+            inputRef={emailRef}
             variant="outlined"
             sx={{
               border: "0.0625rem solid rgba(128, 128, 128, 0.7)",
@@ -83,13 +101,14 @@ const Login = () => {
           <FormControl variant="outlined" fullWidth>
             <InputLabel
               htmlFor="outlined-adornment-password"
-              sx={{ color: "rgb(255, 255, 255)" }}
+              sx={{ color: "white" }}
             >
               Password
             </InputLabel>
             <OutlinedInput
               id="outlined-adornment-password"
               type={showPassword ? "text" : "password"}
+              inputRef={passwordRef}
               endAdornment={
                 <InputAdornment position="end">
                   <IconButton
@@ -112,6 +131,7 @@ const Login = () => {
                 </InputAdornment>
               }
               sx={{
+                color: "white",
                 border: "0.0625rem solid rgba(128, 128, 128, 0.7)",
                 borderRadius: "0.25rem",
                 "& .MuiInputBase-input-MuiOutlinedInput-input": {
@@ -135,6 +155,7 @@ const Login = () => {
               color: "white",
               textTransform: "none",
             }}
+            onClick={() => handleSignIn()}
           >
             {toggleSignUp ? "Sign Up" : "Sign In"}
           </Button>
