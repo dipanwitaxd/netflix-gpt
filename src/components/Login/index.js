@@ -13,13 +13,22 @@ import {
   TextField,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { checkValidData } from "@/utils/validation";
+import { checkValidData, checkValidSignUpData } from "@/utils/validation";
+import { auth } from "@/utils/firebase";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import { useDispatch } from "react-redux";
+import { addUser } from "@/redux/useSlice";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [learnMore, setLearnMore] = useState(false);
   const [toggleSignUp, setToggleSignUp] = useState(false);
   const [formError, setFormError] = useState(null);
+  const dispatch = useDispatch();
   const nameRef = useRef(null);
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
@@ -28,12 +37,64 @@ const Login = () => {
   const handleToggleSignUp = () => setToggleSignUp((prev) => !prev);
   const handleSignIn = () => {
     // Validate form Data
-    const error = checkValidData(
-      emailRef.current.value,
-      passwordRef.current.value
-    );
+    const error = toggleSignUp
+      ? checkValidSignUpData(
+          nameRef?.current.value,
+          emailRef.current.value,
+          passwordRef.current.value
+        )
+      : checkValidData(emailRef.current.value, passwordRef.current.value);
     setFormError(error);
-    console.log(error);
+    if (error) return;
+    //SignIn / SignUp logic
+    if (toggleSignUp) {
+      //Sign Up
+      createUserWithEmailAndPassword(
+        auth,
+        emailRef.current.value,
+        passwordRef.current.value
+      )
+        .then((userCredential) => {
+          // Signed up
+          const user = userCredential.user;
+          console.log("user", user);
+          updateProfile(user, {
+            displayName: nameRef?.current.value,
+          })
+            .then(() => {
+              const { uid, email, displayName } = auth.currentUser;
+              dispatch(addUser({ uid, email, displayName }));
+            })
+            .catch((error) => {
+              const errorCode = error.code;
+              const errorMessage = error.message;
+              setFormError(errorCode + " - " + errorMessage);
+            });
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setFormError(errorCode + " - " + errorMessage);
+        });
+    } else {
+      //Sign In
+      signInWithEmailAndPassword(
+        auth,
+        emailRef.current.value,
+        passwordRef.current.value
+      )
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user;
+          console.log("user", user);
+          // ...
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setFormError(errorCode + " - " + errorMessage);
+        });
+    }
   };
 
   return (
@@ -76,6 +137,7 @@ const Login = () => {
                 },
                 width: "100%",
               }}
+              inputRef={nameRef}
             />
           )}
           <TextField
@@ -203,7 +265,6 @@ const Login = () => {
                   color: "white",
                   textTransform: "none",
                 }}
-                href={""}
                 onClick={() => handleToggleSignUp()}
               >
                 Sign In now.
@@ -222,7 +283,6 @@ const Login = () => {
                   color: "white",
                   textTransform: "none",
                 }}
-                href={""}
                 onClick={() => handleToggleSignUp()}
               >
                 Sign up now.

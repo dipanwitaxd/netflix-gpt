@@ -5,8 +5,7 @@ import Browse from "../Browse";
 const Body = () => {
   return (
     <div>
-      <Login />
-      <Browse />
+     
     </div>
   );
 };

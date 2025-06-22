@@ -41,8 +41,15 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
     - Header
     - Login Form
     - SignUp Form
-    - Form Vlidation 
+    - Form Vlidation
     - useRef Hook
+    - Firebase setup
+    - Deployed app to production
+    - Create signup user account in firebase
+    - Implemented sign in user api
+    - Created redux store with userSlice
+    - implemented sign out
+    - update profile
 
 # Features
 
